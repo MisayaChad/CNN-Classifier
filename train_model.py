@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #coding:utf-8
 
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy
@@ -28,7 +29,7 @@ def get_datasets(train_set, test_set):
     Y_train = convert_to_one_hot(Y_train_orig, 6).T
     Y_test = convert_to_one_hot(Y_test_orig, 6).T
 
-conv_layers = {}
+    return X_train, Y_train, X_test, Y_test
 
 def create_placeholders(n_H0, n_W0, n_C0, n_y):
 
@@ -87,9 +88,9 @@ def compute_cost(Z3, Y):
 
 # GRADED FUNCTION: model
 
-def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
-          num_epochs = 200, minibatch_size = 64, print_cost = True):
-
+def model(train_set_path, test_set_path, learning_rate = 0.009,
+          num_epochs = 100, minibatch_size = 64, print_cost = True):
+    X_train, Y_train, X_test, Y_test = get_datasets(train_set_path, test_set_path)
     ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
     tf.set_random_seed(1)                             # to keep results consistent (tensorflow seed)
     seed = 3                                          # to keep results consistent (numpy seed)
@@ -160,4 +161,6 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
         return train_accuracy, test_accuracy, parameters
 
 if __name__ == "__main__":
-    _, _, parameters = model(X_train, Y_train, X_test, Y_test)
+    train_set_path = sys.argv[1]
+    test_set_path = sys.argv[2]
+    _, _, parameters = model(train_set_path, test_set_path)

@@ -20,6 +20,7 @@ def load_dataset(train_set, test_set):
     test_set_y_orig --
     classes --
     """
+    print (train_set, test_set)
     train_dataset = h5py.File(train_set, "r")
     train_set_x_orig = np.array(train_dataset["train_set_x"][:]) # your train set features
     train_set_y_orig = np.array(train_dataset["train_set_y"][:]) # your train set labels
