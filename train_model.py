@@ -22,13 +22,11 @@ def get_datasets(train_set, test_set):
     train_set -- train set file path
     test_set -- test set file path
     """
-    X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = load_dataset(train_set, test_set)
-    index = 6
+    X_train_orig, Y_train_orig, X_test_orig, Y_test_orig = load_dataset(train_set, test_set)
     X_train = X_train_orig/255.
     X_test = X_test_orig/255.
     Y_train = convert_to_one_hot(Y_train_orig, 6).T
     Y_test = convert_to_one_hot(Y_test_orig, 6).T
-
     return X_train, Y_train, X_test, Y_test
 
 def create_placeholders(n_H0, n_W0, n_C0, n_y):

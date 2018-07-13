@@ -10,6 +10,8 @@ cat_dog_train_path = './*.jpg'
 addrs = glob.glob(cat_dog_train_path)
 labels = [1 if 'cat' in addr else 0 for addr in addrs]  # 0 = Cat, 1 = Dog
 
+print labels
+
 # to shuffle data
 if shuffle_data:
     c = list(zip(addrs, labels))
