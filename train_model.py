@@ -23,10 +23,12 @@ def get_datasets(train_set, test_set):
     test_set -- test set file path
     """
     X_train_orig, Y_train_orig, X_test_orig, Y_test_orig = load_dataset(train_set, test_set)
+
     X_train = X_train_orig/255.
     X_test = X_test_orig/255.
-    Y_train = convert_to_one_hot(Y_train_orig, 6).T
-    Y_test = convert_to_one_hot(Y_test_orig, 6).T
+    print Y_train_orig
+    Y_train = convert_to_one_hot(Y_train_orig, 3).T
+    Y_test = convert_to_one_hot(Y_test_orig, 3).T
     return X_train, Y_train, X_test, Y_test
 
 def create_placeholders(n_H0, n_W0, n_C0, n_y):
@@ -72,7 +74,7 @@ def forward_propagation(X, parameters):
 
     # FULLY-CONNECTED without non-linear activation function (not not call softmax).
     # 6 neurons in output layer. Hint: one of the arguments should be "activation_fn=None"
-    Z3 = tf.contrib.layers.fully_connected(P2, 6, activation_fn=None)
+    Z3 = tf.contrib.layers.fully_connected(P2, 3, activation_fn=None)
 
     return Z3
 
@@ -109,38 +111,42 @@ def model(train_set_path, test_set_path, learning_rate = 0.009,
 
     init = tf.global_variables_initializer()
 
+
+
     # Start the session to compute the tensorflow graph
     with tf.Session() as sess:
 
         # Run the initialization
         sess.run(init)
+        _ , c = sess.run([optimizer, cost], feed_dict={X: X_train, Y: Y_train})
 
+        costs.append(c)
         # Do the training loop
-        for epoch in range(num_epochs):
-
-            minibatch_cost = 0.
-            num_minibatches = int(m / minibatch_size) # number of minibatches of size minibatch_size in the train set
-            seed = seed + 1
-            minibatches = random_mini_batches(X_train, Y_train, minibatch_size, seed)
-
-            for minibatch in minibatches:
-
-                # Select a minibatch
-                (minibatch_X, minibatch_Y) = minibatch
-                # IMPORTANT: The line that runs the graph on a minibatch.
-                # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
-                ### START CODE HERE ### (1 line)
-                _ , temp_cost = sess.run([optimizer, cost], feed_dict={X: minibatch_X, Y: minibatch_Y})
-                ### END CODE HERE ###
-
-                minibatch_cost += temp_cost / num_minibatches
-
-
-            # Print the cost every epoch
-            if print_cost == True and epoch % 5 == 0:
-                print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
-            if print_cost == True and epoch % 1 == 0:
-                costs.append(minibatch_cost)
+        # for epoch in range(num_epochs):
+        #
+        #     minibatch_cost = 0.
+        #     num_minibatches = int(m / minibatch_size) # number of minibatches of size minibatch_size in the train set
+        #     seed = seed + 1
+        #     minibatches = random_mini_batches(X_train, Y_train, minibatch_size, seed)
+        #
+        #     for minibatch in minibatches:
+        #
+        #         # Select a minibatch
+        #         (minibatch_X, minibatch_Y) = minibatch
+        #         # IMPORTANT: The line that runs the graph on a minibatch.
+        #         # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
+        #         ### START CODE HERE ### (1 line)
+        #         _ , temp_cost = sess.run([optimizer, cost], feed_dict={X: minibatch_X, Y: minibatch_Y})
+        #         ### END CODE HERE ###
+        #
+        #         minibatch_cost += temp_cost / num_minibatches
+        #
+        #
+        #     # Print the cost every epoch
+        #     if print_cost == True and epoch % 5 == 0:
+        #         print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
+        #     if print_cost == True and epoch % 1 == 0:
+        #         costs.append(minibatch_cost)
 
 
         predict_op = tf.argmax(Z3, 1)
@@ -150,7 +156,8 @@ def model(train_set_path, test_set_path, learning_rate = 0.009,
         print(accuracy)
         train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
         test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
-
+        print train_accuracy, test_accuracy
+        print Y_train
         # save trained model
         saver = tf.train.Saver()
         tf.add_to_collection('predict_op', predict_op)
