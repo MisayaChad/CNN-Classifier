@@ -89,7 +89,7 @@ def compute_cost(Z3, Y):
 # GRADED FUNCTION: model
 
 def model(train_set_path, test_set_path, learning_rate = 0.009,
-          num_epochs = 100, minibatch_size = 64, print_cost = True):
+          num_epochs = 100, minibatch_size = 1, print_cost = True):
     X_train, Y_train, X_test, Y_test = get_datasets(train_set_path, test_set_path)
     ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
     tf.set_random_seed(1)                             # to keep results consistent (tensorflow seed)
@@ -118,35 +118,35 @@ def model(train_set_path, test_set_path, learning_rate = 0.009,
 
         # Run the initialization
         sess.run(init)
-        _ , c = sess.run([optimizer, cost], feed_dict={X: X_train, Y: Y_train})
+        # _ , c = sess.run([optimizer, cost], feed_dict={X: X_train, Y: Y_train})
 
-        costs.append(c)
+        # costs.append(c)
         # Do the training loop
-        # for epoch in range(num_epochs):
-        #
-        #     minibatch_cost = 0.
-        #     num_minibatches = int(m / minibatch_size) # number of minibatches of size minibatch_size in the train set
-        #     seed = seed + 1
-        #     minibatches = random_mini_batches(X_train, Y_train, minibatch_size, seed)
-        #
-        #     for minibatch in minibatches:
-        #
-        #         # Select a minibatch
-        #         (minibatch_X, minibatch_Y) = minibatch
-        #         # IMPORTANT: The line that runs the graph on a minibatch.
-        #         # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
-        #         ### START CODE HERE ### (1 line)
-        #         _ , temp_cost = sess.run([optimizer, cost], feed_dict={X: minibatch_X, Y: minibatch_Y})
-        #         ### END CODE HERE ###
-        #
-        #         minibatch_cost += temp_cost / num_minibatches
-        #
-        #
-        #     # Print the cost every epoch
-        #     if print_cost == True and epoch % 5 == 0:
-        #         print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
-        #     if print_cost == True and epoch % 1 == 0:
-        #         costs.append(minibatch_cost)
+        for epoch in range(num_epochs):
+
+            minibatch_cost = 0.
+            num_minibatches = int(m / minibatch_size) # number of minibatches of size minibatch_size in the train set
+            seed = seed + 1
+            minibatches = random_mini_batches(X_train, Y_train, minibatch_size, seed)
+
+            for minibatch in minibatches:
+
+                # Select a minibatch
+                (minibatch_X, minibatch_Y) = minibatch
+                # IMPORTANT: The line that runs the graph on a minibatch.
+                # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
+                ### START CODE HERE ### (1 line)
+                _ , temp_cost = sess.run([optimizer, cost], feed_dict={X: minibatch_X, Y: minibatch_Y})
+                ### END CODE HERE ###
+
+                minibatch_cost += temp_cost / num_minibatches
+
+
+            # Print the cost every epoch
+            if print_cost == True and epoch % 5 == 0:
+                print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
+            if print_cost == True and epoch % 1 == 0:
+                costs.append(minibatch_cost)
 
 
         predict_op = tf.argmax(Z3, 1)
