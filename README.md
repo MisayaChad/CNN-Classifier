@@ -66,6 +66,12 @@ modify `train_hdf5_path` and `test_hdf5_path` parameters whatever you like, and 
 
 Before you train the model, you can adjust the `minibatch_size` parameter, set it to 1 if you have few images and just want to test it.
 
+there are some guidelines:
+
+1. if you have less than (<=) 2000 samples, set this parameter to 1, which means you just use batch gradient descent.
+
+2. choose a number from 64 to 512, use 2^n, such as 64, 128, 256, 512 which can speed up your training
+
 ```sh
 python train_model.py  <train_set_path> <test_set_path>
 ```
@@ -77,3 +83,13 @@ After training the model, you can run the following command:
 ```sh
 python predict.py <your image path>
 ```
+
+### Which parameters should you choose to improve your performance?
+
+there are somes tips:
+
+1. learning rate
+2. mini-batch size
+3. hidden layers
+
+## Just have fun :)
