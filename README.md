@@ -1,5 +1,5 @@
 # CNN-Classifier
-An image classifier base on tensorflow
+An image classifier base on tensorflow. You can finish any type of image classifier base on it. The only thing you need to do is collecting your image data.
 
 ## CNN Architecture
 
