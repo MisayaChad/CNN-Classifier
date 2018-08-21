@@ -6,7 +6,7 @@ from utils import *
 train_hdf5_path = './train_dataset.h5'
 test_hdf5_path = './test_dataset.h5'
 
-images_path = './*.jpg'
+images_path = './images/*.jpg'
 keyword = 'cat'
 
 file_sets = list_images_and_lables(images_path, keyword)

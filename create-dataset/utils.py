@@ -29,12 +29,10 @@ def list_images_and_lables(images_path, keyword, shuffle_data = True):
     labels = []
     for i in range(len(addrs)):
         # fix me! use constants or parameters here! I will fix it later
-        if "cat" in addrs[i]:
+        if "in" in addrs[i]:
             labels.append(1)
-        elif "dog" in addrs[i]:
-            labels.append(2)
         else:
-            labels.append(0)
+            labels.append(2)
     # to shuffle data
     if shuffle_data:
         c = list(zip(addrs, labels))
@@ -53,7 +51,8 @@ def list_images_and_lables(images_path, keyword, shuffle_data = True):
 
     return (train_addrs, train_labels, dev_addrs, dev_labels, test_addrs, test_labels)
 
-def create_hdf5(train_hdf5_path, test_hdf5_path, file_sets, diamention = 64):
+# diamention: orign = 64  VGGNet16 = 24
+def create_hdf5(train_hdf5_path, test_hdf5_path, file_sets, diamention = 224):
 
     train_addrs, train_labels, dev_addrs, dev_labels, test_addrs, test_labels = file_sets
 
@@ -77,7 +76,7 @@ def create_hdf5(train_hdf5_path, test_hdf5_path, file_sets, diamention = 64):
     # could someone finish this part? :)
 
 
-def load_images_info_h5(train_hdf5_path, test_hdf5_path, file_sets, diamention = 64):
+def load_images_info_h5(train_hdf5_path, test_hdf5_path, file_sets, diamention = 224):
     train_addrs, train_labels, dev_addrs, dev_labels, test_addrs, test_labels = file_sets
     train_shape = (len(train_addrs), diamention, diamention, 3)
     # dev_shape = (len(dev_addrs), diamention, diamention, 3)
