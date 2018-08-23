@@ -13,7 +13,7 @@ file_path = sys.argv[1]
 
 if __name__ == "__main__":
     image = np.array(ndimage.imread(file_path, flatten = False))
-    my_image = scipy.misc.imresize(image, size = (64, 64), mode = 'RGB')
+    my_image = scipy.misc.imresize(image, size = (224, 224), mode = 'RGB')
     # my_image = my_image / 255.
     my_image_work = np.expand_dims(my_image, 0)
     print("Using a picture of shape", my_image_work.shape, "for the prediction")

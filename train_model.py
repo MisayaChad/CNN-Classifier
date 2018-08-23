@@ -13,6 +13,7 @@ from tools.cnn_utils import *
 from tools.dataset import *
 import os
 from vggnet_16 import *
+import vgg16
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -27,8 +28,11 @@ def get_datasets(train_set, test_set):
 
     X_train = X_train_orig/255.
     X_test = X_test_orig/255.
-    Y_train = convert_to_one_hot(Y_train_orig, 3).T
-    Y_test = convert_to_one_hot(Y_test_orig, 3).T
+    Y_train = convert_to_one_hot(Y_train_orig, 2).T
+    Y_test = convert_to_one_hot(Y_test_orig, 2).T
+    # Y_train = Y_train_orig.reshape(96, 1)
+    # Y_test = Y_test_orig.reshape(25, 1)
+
     return X_train, Y_train, X_test, Y_test
 
 def create_placeholders(n_H0, n_W0, n_C0, n_y):
@@ -88,7 +92,7 @@ def compute_cost(Z3, Y):
 
 # GRADED FUNCTION: model
 
-def model(train_set_path, test_set_path, learning_rate = 0.009,
+def model(train_set_path, test_set_path, learning_rate = 1e-4,
           num_epochs = 3, minibatch_size = 1, print_cost = True):
     X_train, Y_train, X_test, Y_test = get_datasets(train_set_path, test_set_path)
     ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
@@ -107,7 +111,7 @@ def model(train_set_path, test_set_path, learning_rate = 0.009,
     cost = compute_cost(Z3, Y)
     ### END CODE HERE ###
 
-    optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate = learning_rate).minimize(cost)
 
     init = tf.global_variables_initializer()
 
@@ -165,8 +169,8 @@ def model(train_set_path, test_set_path, learning_rate = 0.009,
 
         return train_accuracy, test_accuracy, parameters
 
-def modelVGGNet16(train_set_path, test_set_path, learning_rate = 0.009,
-          num_epochs = 100, minibatch_size = 64, print_cost = True):
+def modelVGGNet16(train_set_path, test_set_path, learning_rate = 2e-3,
+          num_epochs = 15, minibatch_size = 1, print_cost = True):
     X_train, Y_train, X_test, Y_test = get_datasets(train_set_path, test_set_path)
     ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
     tf.set_random_seed(1)                             # to keep results consistent (tensorflow seed)
@@ -220,8 +224,10 @@ def modelVGGNet16(train_set_path, test_set_path, learning_rate = 0.009,
 
 
             # Print the cost every epoch
-            if print_cost == True and epoch % 5 == 0:
-                print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
+            print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
+
+            # if print_cost == True and epoch % 5 == 0:
+            #     print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
             if print_cost == True and epoch % 1 == 0:
                 costs.append(minibatch_cost)
 
@@ -241,7 +247,94 @@ def modelVGGNet16(train_set_path, test_set_path, learning_rate = 0.009,
 
         return train_accuracy, test_accuracy, parameters
 
+def pretrained_vgg16_model(train_set_path, test_set_path, starter_learning_rate = 0.09,
+          num_epochs = 100, minibatch_size = 64, print_cost = True):
+
+    X_train, Y_train, X_test, Y_test = get_datasets(train_set_path, test_set_path)
+    ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
+    (m, n_H0, n_W0, n_C0) = X_train.shape
+    n_y = Y_train.shape[1]
+    costs = []                                        # To keep track of the cost
+
+    X, Y = create_placeholders(n_H0, n_W0, n_C0, n_y)
+
+    # load pretrained vgg16 model
+    vgg = vgg16.Vgg16()
+    with tf.name_scope("content_vgg"):
+        # 载入VGG16模型
+        vgg.build(X)
+
+    # add own fully_connected layer
+    # fc = tf.contrib.layers.fully_connected(vgg.prob, 512)
+
+    print tf.Variable(0, trainable=False)
+    logits = tf.contrib.layers.fully_connected(vgg.prob, 2, activation_fn=None)
+
+    cost = compute_cost(logits, Y)
+    ### END CODE HERE ###
+
+    # tvars = tf.trainable_variables()
+
+    global_step = tf.Variable(0, trainable=False)
+    learning_rate = tf.train.exponential_decay(starter_learning_rate, 100,
+                                               10, 0.96, staircase=False)
+    optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
+
+    init = tf.global_variables_initializer()
+
+
+    # Start the session to compute the tensorflow graph
+    with tf.Session() as sess:
+
+        # Run the initialization
+        sess.run(init)
+        # _ , c = sess.run([optimizer, cost], feed_dict={X: X_train, Y: Y_train})
+
+        # costs.append(c)
+        # Do the training loop
+        for epoch in range(num_epochs):
+
+            minibatch_cost = 0.
+            num_minibatches = int(m / minibatch_size) # number of minibatches of size minibatch_size in the train set
+            minibatches = random_mini_batches(X_train, Y_train, minibatch_size)
+
+            for minibatch in minibatches:
+
+                # Select a minibatch
+                (minibatch_X, minibatch_Y) = minibatch
+                # IMPORTANT: The line that runs the graph on a minibatch.
+                # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
+                ### START CODE HERE ### (1 line)
+                _ , temp_cost = sess.run([optimizer, cost], feed_dict={X: minibatch_X, Y: minibatch_Y})
+                ### END CODE HERE ###
+
+                minibatch_cost += temp_cost / num_minibatches
+
+
+            # Print the cost every epoch
+            if print_cost == True and epoch % 1 == 0:
+                print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
+            if print_cost == True and epoch % 1 == 0:
+                costs.append(minibatch_cost)
+
+
+        predict_op = tf.argmax(logits, 1)
+        correct_prediction = tf.equal(predict_op, tf.argmax(Y, 1))
+
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+        print(accuracy)
+        train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
+        test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
+        print train_accuracy, test_accuracy
+        print Y_train
+        # save trained model
+        saver = tf.train.Saver()
+        tf.add_to_collection('predict_op', predict_op)
+        saver.save(sess, './my_test_model')
+
+        return train_accuracy, test_accuracy, parameters
+
 if __name__ == "__main__":
     train_set_path = sys.argv[1]
     test_set_path = sys.argv[2]
-    _, _, parameters = modelVGGNet16(train_set_path, test_set_path)
+    _, _, parameters = pretrained_vgg16_model(train_set_path, test_set_path)

@@ -3,8 +3,8 @@
 
 from utils import *
 
-train_hdf5_path = './train_dataset.h5'
-test_hdf5_path = './test_dataset.h5'
+train_hdf5_path = '../train_dataset.h5'
+test_hdf5_path = '../test_dataset.h5'
 
 images_path = './images/*.jpg'
 keyword = 'cat'

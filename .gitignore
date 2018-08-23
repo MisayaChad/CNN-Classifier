@@ -4,3 +4,5 @@
 **/*.meta
 **/*.index
 **/*.jpg
+**/.DS_Store
+**/*.npy

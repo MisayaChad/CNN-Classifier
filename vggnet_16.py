@@ -109,5 +109,8 @@ def inference_op(input_op, keep_prob):
     # 第三个全连接层
     fc8 = fc_op(fc7_drop, name="fc8", n_out=1000, p=p)
     '''
-    fc8 = fc_op(resh1, name="fc8", n_out=3, p=p)
+    # fc8 = fc_op(resh1, name="fc8", n_out=3, p=p)
+    fc8 = tf.contrib.layers.fully_connected(resh1, 1, activation_fn=None)
+    # out_relu = tf.nn.relu(fc8, name="relu")
+    # finaloutput = tf.nn.sigmoid(fc8, name="sigmoid")
     return fc8

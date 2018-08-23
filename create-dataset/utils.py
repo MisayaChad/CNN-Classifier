@@ -30,9 +30,9 @@ def list_images_and_lables(images_path, keyword, shuffle_data = True):
     for i in range(len(addrs)):
         # fix me! use constants or parameters here! I will fix it later
         if "in" in addrs[i]:
-            labels.append(1)
+            labels.append(0)
         else:
-            labels.append(2)
+            labels.append(1)
     # to shuffle data
     if shuffle_data:
         c = list(zip(addrs, labels))
@@ -40,8 +40,8 @@ def list_images_and_lables(images_path, keyword, shuffle_data = True):
         addrs, labels = zip(*c)
 
     # Divide the hata into 60% train, 20% validation, and 20% test
-    train_addrs = addrs[0:int(0.6*len(addrs))]
-    train_labels = labels[0:int(0.6*len(labels))]
+    train_addrs = addrs[0:int(0.8*len(addrs))]
+    train_labels = labels[0:int(0.8*len(labels))]
 
     dev_addrs = addrs[int(0.6*len(addrs)):int(0.8*len(addrs))]
     dev_labels = labels[int(0.6*len(addrs)):int(0.8*len(addrs))]
