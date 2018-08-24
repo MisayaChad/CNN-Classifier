@@ -14,6 +14,7 @@ from tools.dataset import *
 import os
 from vggnet_16 import *
 import vgg16
+import time
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -247,8 +248,8 @@ def modelVGGNet16(train_set_path, test_set_path, learning_rate = 2e-3,
 
         return train_accuracy, test_accuracy, parameters
 
-def pretrained_vgg16_model(train_set_path, test_set_path, starter_learning_rate = 0.09,
-          num_epochs = 100, minibatch_size = 64, print_cost = True):
+def pretrained_vgg16_model(train_set_path, test_set_path, starter_learning_rate = 0.07,
+          num_epochs = 220, minibatch_size = 1, print_cost = True):
 
     X_train, Y_train, X_test, Y_test = get_datasets(train_set_path, test_set_path)
     ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
@@ -261,22 +262,20 @@ def pretrained_vgg16_model(train_set_path, test_set_path, starter_learning_rate 
     # load pretrained vgg16 model
     vgg = vgg16.Vgg16()
     with tf.name_scope("content_vgg"):
-        # 载入VGG16模型
+        # load VGG16
         vgg.build(X)
 
     # add own fully_connected layer
-    # fc = tf.contrib.layers.fully_connected(vgg.prob, 512)
-
-    print tf.Variable(0, trainable=False)
-    logits = tf.contrib.layers.fully_connected(vgg.prob, 2, activation_fn=None)
+    fc = tf.contrib.layers.fully_connected(vgg.prob, 1024)
+    # with tf.name_scope("final_fc"):
+    logits = tf.contrib.layers.fully_connected(fc, 2, activation_fn=None)
 
     cost = compute_cost(logits, Y)
     ### END CODE HERE ###
 
     # tvars = tf.trainable_variables()
 
-    global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(starter_learning_rate, 100,
+    learning_rate = tf.train.exponential_decay(starter_learning_rate, 200,
                                                10, 0.96, staircase=False)
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
 
@@ -293,7 +292,7 @@ def pretrained_vgg16_model(train_set_path, test_set_path, starter_learning_rate 
         # costs.append(c)
         # Do the training loop
         for epoch in range(num_epochs):
-
+            start_time = time.time()
             minibatch_cost = 0.
             num_minibatches = int(m / minibatch_size) # number of minibatches of size minibatch_size in the train set
             minibatches = random_mini_batches(X_train, Y_train, minibatch_size)
@@ -313,6 +312,7 @@ def pretrained_vgg16_model(train_set_path, test_set_path, starter_learning_rate 
 
             # Print the cost every epoch
             if print_cost == True and epoch % 1 == 0:
+                print(("build model finished: %ds" % (time.time() - start_time)))
                 print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
             if print_cost == True and epoch % 1 == 0:
                 costs.append(minibatch_cost)
